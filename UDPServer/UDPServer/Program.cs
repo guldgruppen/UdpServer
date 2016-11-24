@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UDPSensorReceiver;
 
 namespace UDPServer
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
+            new CommandManager();
+            Console.ReadKey();
         }
     }
 }
