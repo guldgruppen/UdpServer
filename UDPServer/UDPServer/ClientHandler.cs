@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -16,6 +17,7 @@ namespace UDPSensorReceiver
         IPEndPoint receiverEndPoint;
         IPEndPoint senderEndPoint;
         private UdpBroadcaster _udpBroadcaster = UdpBroadcaster.GetInstance;
+        private Temperatur _temperatur;
         public ClientHandler(int port)
         {
             udpReceiver = new UdpClient(port);
@@ -31,8 +33,10 @@ namespace UDPSensorReceiver
                 {
                     Byte[] receiveBytes = udpReceiver.Receive(ref receiverEndPoint);
                     string receivedData = Encoding.ASCII.GetString(receiveBytes);
+                    _temperatur = new Temperatur { Name = receivedData, };
+                    string jsonString = JsonConvert.SerializeObject(_temperatur);
                     Console.WriteLine(receivedData);
-                    _udpBroadcaster.BroadcastMessage(receiveBytes);
+                    _udpBroadcaster.BroadcastMessage(Encoding.ASCII.GetBytes(jsonString));
                 }
             }
             catch (Exception e)
