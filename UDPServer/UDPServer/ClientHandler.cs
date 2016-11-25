@@ -26,7 +26,8 @@ namespace UDPSensorReceiver
         {         
             try
             {
-                while (true)
+                UdpBroadcaster.IsRunning = true;
+                while (UdpBroadcaster.IsRunning)
                 {
                     Byte[] receiveBytes = udpReceiver.Receive(ref receiverEndPoint);
                     string receivedData = Encoding.ASCII.GetString(receiveBytes);

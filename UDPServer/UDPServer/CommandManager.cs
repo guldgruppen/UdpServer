@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UDPServer;
 
 namespace UDPSensorReceiver
 {
@@ -11,6 +12,7 @@ namespace UDPSensorReceiver
         private FileManager _fileManager;
         private bool _isRunning;
         private bool _isCommandLoopRunning;
+        private List<Task> TaskPool = new List<Task>();
         public CommandManager()
         {
             _fileManager = new FileManager();
@@ -38,6 +40,10 @@ namespace UDPSensorReceiver
                         Console.WriteLine();
                         GetNumberOfClients();
                         break;
+                    case "delete":
+                        Console.WriteLine();
+                        DeleteClient();
+                        break;
                     case "execute":
                         Console.WriteLine();
                         ReceiveAndSendData();
@@ -48,7 +54,7 @@ namespace UDPSensorReceiver
                         break;
                     case "exit":
                         Console.WriteLine();
-                        _isCommandLoopRunning = false;
+                        ExitShell();
                         break;
                     case "help":
                         Console.WriteLine();
@@ -81,7 +87,11 @@ namespace UDPSensorReceiver
             Console.WriteLine("type 'exit' to delete a client");
             Console.WriteLine();
         }
-
+        public void ExitShell()
+        {
+            _isCommandLoopRunning = false;
+            Environment.Exit(1);
+        }
         public void InsertClient()
         {
             Console.WriteLine("Enter client name:");
@@ -100,17 +110,27 @@ namespace UDPSensorReceiver
 
         public void StopReceivingData()
         {
-            Console.WriteLine("Currently not implemented");
-        }
+            UdpBroadcaster.IsRunning = false;
 
+            Console.WriteLine("Receiving and sending data stopped successfully");
+            Console.WriteLine("bug causes program to crash if you excecute again");
+        }
+        public void DeleteClient()
+        {
+            Console.WriteLine("Enter client id");
+            int id = Int32.Parse(Console.ReadLine());
+            _fileManager.DeleteClient(id);
+            Console.WriteLine("Client deleted Successfully");
+        }
         public void ReceiveAndSendData()
         {
             var clients = _fileManager.GetClients();
-            foreach(var client in clients)
-            {
-                ClientHandler clientHandler = new ClientHandler(client.Port);
-                Task.Factory.StartNew(() => clientHandler.Broadcast());
-            }
+                foreach (var client in clients)
+                {
+                    ClientHandler clientHandler = new ClientHandler(client.Port);
+                    Task.Factory.StartNew(() => clientHandler.Broadcast());
+                }
+            
         }
 
     }

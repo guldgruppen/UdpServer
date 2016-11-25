@@ -12,6 +12,7 @@ namespace UDPServer
     {
         private static UdpBroadcaster udpBroadcaster;
         public static UdpBroadcaster GetInstance => udpBroadcaster ?? new UdpBroadcaster();
+        public static bool IsRunning = false;
         private UdpClient udpSender;
         private IPEndPoint senderEndPoint;
         private UdpBroadcaster()
