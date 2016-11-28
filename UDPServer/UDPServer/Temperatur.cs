@@ -6,10 +6,17 @@ using System.Threading.Tasks;
 
 namespace UDPServer
 {
-    public class Temperatur
+    public partial class Temperatur
     {
-        public string Name { get; set; }
+        public int Id { get; set; }
+
         public string Data { get; set; }
-        public DateTime TimeStamp { get; set; }
+
+        public DateTime Timestamp { get; set; }
+
+        public int Location { get; set; }
+
+        public int Status { get; set; }
+
     }
 }

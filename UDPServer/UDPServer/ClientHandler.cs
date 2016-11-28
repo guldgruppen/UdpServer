@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UDPServer;
 
@@ -12,16 +14,31 @@ namespace UDPSensorReceiver
 {
     public class ClientHandler
     {
-        private UdpClient udpReceiver;
+        private static UdpClient udpReceiver;
         UdpClient udpSender;
-        IPEndPoint receiverEndPoint;
+        static IPEndPoint receiverEndPoint;
         IPEndPoint senderEndPoint;
         private UdpBroadcaster _udpBroadcaster = UdpBroadcaster.GetInstance;
         private Temperatur _temperatur;
+        private string receivedData;
+        private Timer timer;
         public ClientHandler(int port)
         {
             udpReceiver = new UdpClient(port);
-            receiverEndPoint = new IPEndPoint(IPAddress.Any, port);        
+            receiverEndPoint = new IPEndPoint(IPAddress.Any, port);
+            timer = new Timer(TimeBack, null, 0, 4000);
+        }
+
+        private async void TimeBack(object state)
+        {
+            if (_temperatur != null)
+            {
+                string jsonData = JsonConvert.SerializeObject(_temperatur);
+                using (HttpClient client = new HttpClient())
+                {
+                    await client.PostAsJsonAsync("http://localhost:28553/TempService.svc/Temperatur/Post/", jsonData);
+                }               
+            }
         }
 
         public void Broadcast()
@@ -32,8 +49,8 @@ namespace UDPSensorReceiver
                 while (UdpBroadcaster.IsRunning)
                 {
                     Byte[] receiveBytes = udpReceiver.Receive(ref receiverEndPoint);
-                    string receivedData = Encoding.ASCII.GetString(receiveBytes);
-                    _temperatur = new Temperatur { Name = receivedData, };
+                    receivedData = Encoding.ASCII.GetString(receiveBytes);
+                    _temperatur = new Temperatur {Location = 1, Data = receivedData, Timestamp = DateTime.Now };
                     string jsonString = JsonConvert.SerializeObject(_temperatur);
                     Console.WriteLine(receivedData);
                     _udpBroadcaster.BroadcastMessage(Encoding.ASCII.GetBytes(jsonString));
