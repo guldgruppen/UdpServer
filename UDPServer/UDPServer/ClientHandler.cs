@@ -50,9 +50,10 @@ namespace UDPSensorReceiver
                 {
                     Byte[] receiveBytes = udpReceiver.Receive(ref receiverEndPoint);
                     receivedData = Encoding.ASCII.GetString(receiveBytes);
-                    _temperatur = new Temperatur {Location = 1, Data = receivedData, Timestamp = DateTime.Now };
+                    string temp = Filter.GetTempData(receivedData);
+                    _temperatur = new Temperatur {Location = 1, Data = temp, Timestamp = DateTime.Now };
                     string jsonString = JsonConvert.SerializeObject(_temperatur);
-                    Console.WriteLine(receivedData);
+                    Console.WriteLine(temp);
                     _udpBroadcaster.BroadcastMessage(Encoding.ASCII.GetBytes(jsonString));
                 }
             }
