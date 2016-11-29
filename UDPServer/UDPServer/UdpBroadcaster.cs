@@ -24,7 +24,6 @@ namespace UDPServer
 
         public void BroadcastMessage(Byte[] bytesToSend)
         {
-            UdpClient udpSender = new UdpClient();
             udpSender.Send(bytesToSend, bytesToSend.Length, senderEndPoint);
         }
     }
