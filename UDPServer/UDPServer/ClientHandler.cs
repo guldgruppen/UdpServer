@@ -15,6 +15,8 @@ namespace UDPSensorReceiver
     public class ClientHandler
     {
         private static UdpClient udpReceiver;
+        private const double FACTOR = 0.1;
+
         UdpClient udpSender;
         static IPEndPoint receiverEndPoint;
         IPEndPoint senderEndPoint;
@@ -37,7 +39,8 @@ namespace UDPSensorReceiver
                 using (HttpClient client = new HttpClient())
                 {
                     await client.PostAsJsonAsync("http://localhost:28553/TempService.svc/Temperatur/Post/", jsonData);
-                }               
+                }
+                Console.WriteLine(jsonData);            
             }
         }
 
@@ -51,9 +54,9 @@ namespace UDPSensorReceiver
                     Byte[] receiveBytes = udpReceiver.Receive(ref receiverEndPoint);
                     receivedData = Encoding.ASCII.GetString(receiveBytes);
                     string temp = Filter.GetTempData(receivedData);
-                    _temperatur = new Temperatur {Location = 1, Data = temp, Timestamp = DateTime.Now };
+                    _temperatur = new Temperatur {Location = 1, Data = (double.Parse(temp)*FACTOR).ToString(), Timestamp = DateTime.Now };
                     string jsonString = JsonConvert.SerializeObject(_temperatur);
-                    Console.WriteLine(temp);
+                    Console.WriteLine(_temperatur.Data);
                     _udpBroadcaster.BroadcastMessage(Encoding.ASCII.GetBytes(jsonString));
                 }
             }
